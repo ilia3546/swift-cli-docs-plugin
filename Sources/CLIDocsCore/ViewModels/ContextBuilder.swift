@@ -142,10 +142,14 @@ public struct ContextBuilder {
 
         let aliases = config.theme.showAliases ? (info.aliases ?? []) : []
 
-        let synopsis = SynopsisBuilder.build(commandPath: fullPath, arguments: info.arguments)
-
         let argumentSections = makeArgumentSections(info: info)
         let subcommands = makeSubcommandLinks(info: info, parentPath: fullPath)
+        let synopsis = SynopsisBuilder.build(
+            commandPath: fullPath,
+            arguments: info.arguments,
+            hasSubcommands: !subcommands.isEmpty,
+            includeHelpFlag: config.theme.showHelpFlag
+        )
         let examples = makeExamples(info: info, override: override)
         let customSections = resolveCustomSections()
 
@@ -179,21 +183,34 @@ public struct ContextBuilder {
 
     private func makeArgumentSections(info: CommandInfoV0) -> [ArgumentSectionView] {
         let allArgs = (info.arguments ?? []).filter { config.theme.showHidden || $0.shouldDisplay }
+            .filter { keepArgument($0) }
         guard !allArgs.isEmpty else { return [] }
 
         // Group by sectionTitle when set, else by kind.
         var bySection: [String: [ArgumentInfoV0]] = [:]
-        var sectionOrder: [String] = []
-        for arg in allArgs {
+        var insertionOrder: [String: Int] = [:]
+        for (idx, arg) in allArgs.enumerated() {
             let key = arg.sectionTitle ?? defaultSectionTitle(for: arg.kind)
             if bySection[key] == nil {
                 bySection[key] = []
-                sectionOrder.append(key)
+                insertionOrder[key] = idx
             }
             bySection[key]?.append(arg)
         }
 
-        return sectionOrder.map { title in
+        // Sort sections by config.sections.order (mapping default kind titles to
+        // the canonical "arguments"/"options"/"flags" identifiers). Custom titles
+        // not in the order fall back to insertion order, after known sections.
+        let configOrder = config.sections.order.map { $0.lowercased() }
+        let titles = Array(bySection.keys)
+        let sorted = titles.sorted { lhs, rhs in
+            let lRank = sectionRank(title: lhs, kind: detectKind(of: bySection[lhs] ?? []), configOrder: configOrder)
+            let rRank = sectionRank(title: rhs, kind: detectKind(of: bySection[rhs] ?? []), configOrder: configOrder)
+            if lRank != rRank { return lRank < rRank }
+            return (insertionOrder[lhs] ?? 0) < (insertionOrder[rhs] ?? 0)
+        }
+
+        return sorted.map { title in
             let bucket = bySection[title] ?? []
             return ArgumentSectionView(
                 title: title,
@@ -201,6 +218,29 @@ public struct ContextBuilder {
                 arguments: bucket.map(makeArgumentView(_:))
             )
         }
+    }
+
+    /// Drop `--help` rows when the theme says so. The flag is added automatically
+    /// by ArgumentParser to every command and clutters the docs.
+    private func keepArgument(_ arg: ArgumentInfoV0) -> Bool {
+        if config.theme.showHelpFlag { return true }
+        guard arg.kind == .flag else { return true }
+        let names = (arg.names ?? []).map(\.name)
+        return !names.contains("help") && !names.contains("h")
+    }
+
+    /// Rank used to sort argument sections. Maps the section's primary kind to
+    /// its identifier in `config.sections.order` (e.g. flag → "flags"). Sections
+    /// that don't match an identifier are placed at the end.
+    private func sectionRank(title: String, kind: ArgumentSectionView.Kind, configOrder: [String]) -> Int {
+        let identifier: String
+        switch kind {
+        case .positional: identifier = "arguments"
+        case .option: identifier = "options"
+        case .flag: identifier = "flags"
+        case .mixed: identifier = title.lowercased()
+        }
+        return configOrder.firstIndex(of: identifier) ?? Int.max
     }
 
     private func defaultSectionTitle(for kind: ArgumentInfoV0.KindV0) -> String {

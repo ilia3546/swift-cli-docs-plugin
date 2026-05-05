@@ -30,12 +30,12 @@ public struct MultiFileLayout {
                 fullPath: command.fullPath.split(separator: " ").map(String.init),
                 rootName: rootName
             )
-            files.append(GeneratedFile(relativePath: path, contents: body))
+            files.append(GeneratedFile(relativePath: path, contents: MarkdownEscape.tidy(body)))
         }
 
         let indexContext = RenderContext(meta: meta, theme: theme, commands: commands, index: index).asDictionary()
         let indexBody = try engine.render(template: "index.stencil", context: indexContext)
-        files.append(GeneratedFile(relativePath: config.output.index, contents: indexBody))
+        files.append(GeneratedFile(relativePath: config.output.index, contents: MarkdownEscape.tidy(indexBody)))
 
         return files
     }

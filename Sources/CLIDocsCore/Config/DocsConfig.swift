@@ -111,6 +111,7 @@ public struct ThemeConfig: Codable, Equatable, Sendable {
     public var toc: Bool
     public var showAliases: Bool
     public var showHidden: Bool
+    public var showHelpFlag: Bool
     public var codeFence: String
     public var emoji: Bool
     public var variables: [String: String]
@@ -122,6 +123,7 @@ public struct ThemeConfig: Codable, Equatable, Sendable {
         toc: Bool = true,
         showAliases: Bool = true,
         showHidden: Bool = false,
+        showHelpFlag: Bool = false,
         codeFence: String = "bash",
         emoji: Bool = false,
         variables: [String: String] = [:]
@@ -132,13 +134,14 @@ public struct ThemeConfig: Codable, Equatable, Sendable {
         self.toc = toc
         self.showAliases = showAliases
         self.showHidden = showHidden
+        self.showHelpFlag = showHelpFlag
         self.codeFence = codeFence
         self.emoji = emoji
         self.variables = variables
     }
 
     private enum CodingKeys: String, CodingKey {
-        case name, path, headingDepth, toc, showAliases, showHidden, codeFence, emoji, variables
+        case name, path, headingDepth, toc, showAliases, showHidden, showHelpFlag, codeFence, emoji, variables
     }
 
     public init(from decoder: Decoder) throws {
@@ -149,6 +152,7 @@ public struct ThemeConfig: Codable, Equatable, Sendable {
         self.toc = try c.decodeIfPresent(Bool.self, forKey: .toc) ?? true
         self.showAliases = try c.decodeIfPresent(Bool.self, forKey: .showAliases) ?? true
         self.showHidden = try c.decodeIfPresent(Bool.self, forKey: .showHidden) ?? false
+        self.showHelpFlag = try c.decodeIfPresent(Bool.self, forKey: .showHelpFlag) ?? false
         self.codeFence = try c.decodeIfPresent(String.self, forKey: .codeFence) ?? "bash"
         self.emoji = try c.decodeIfPresent(Bool.self, forKey: .emoji) ?? false
         self.variables = try c.decodeIfPresent([String: String].self, forKey: .variables) ?? [:]

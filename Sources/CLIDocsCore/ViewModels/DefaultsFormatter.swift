@@ -29,11 +29,11 @@ public enum DefaultsFormatter {
         switch argument.kind {
         case .positional:
             let value = argument.valueName ?? "value"
-            return argument.isRepeating ? "<\(value)> ..." : "<\(value)>"
+            return argument.isRepeating ? "<\(value)>..." : "<\(value)>"
         case .option:
             let names = formattedNames(argument)
             let value = argument.valueName ?? "value"
-            let suffix = argument.isRepeating ? " <\(value)> ..." : " <\(value)>"
+            let suffix = argument.isRepeating ? " <\(value)>..." : " <\(value)>"
             return names + suffix
         case .flag:
             return formattedNames(argument)
