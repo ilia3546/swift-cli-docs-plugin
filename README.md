@@ -1,21 +1,62 @@
-# swift-cli-docs-plugin
+# Swift CLI Docs Plugin
 
-A Swift Package Manager command plugin that generates beautiful Markdown
-documentation for any CLI tool built with [swift-argument-parser][sap].
-It reads the tool's `--experimental-dump-help` JSON, applies your YAML
-configuration, and renders Markdown via Stencil templates.
+[![CI](https://github.com/ilia3546/swift-cli-docs-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/ilia3546/swift-cli-docs-plugin/actions/workflows/ci.yml)
+[![Swift](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Filia3546%2Fswift-cli-docs-plugin%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ilia3546/swift-cli-docs-plugin)
+[![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Filia3546%2Fswift-cli-docs-plugin%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ilia3546/swift-cli-docs-plugin)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Support on Boosty](https://img.shields.io/badge/support-Boosty-f15f2c?logo=boosty&logoColor=white)](https://boosty.to/ilia3546/donate)
+
+**Turn any Swift CLI into beautiful Markdown documentation with a single command.**
+
+`swift-cli-docs-plugin` is an SPM command plugin for tools built with
+[swift-argument-parser][sap]. It introspects your CLI, applies a tiny YAML
+config, and renders polished Markdown that drops straight into your README,
+GitHub Pages, mdBook, or MkDocs — no DocC, no man pages, no hand-written
+reference tables.
+
+```bash
+swift package --allow-writing-to-package-directory generate-docs
+```
+
+That's it. Your `docs/` folder now contains a per-command Markdown reference
+with synopses, argument tables, examples, and cross-links.
 
 [sap]: https://github.com/apple/swift-argument-parser
 
 ## Why
 
-The official [`generate-manual`][generate-manual] plugin produces man pages,
-and [`generate-docc-reference`][generate-docc-reference] produces DocC. There
-was no first-class option for plain Markdown that drops cleanly into a README,
-GitHub Pages, mdBook, or MkDocs. This plugin fills that gap.
+Apple ships two doc generators for `swift-argument-parser`:
 
-[generate-manual]: https://github.com/apple/swift-argument-parser/tree/main/Plugins/GenerateManualPlugin
-[generate-docc-reference]: https://github.com/swiftlang/swift-argument-parser-docs
+- [`GenerateManual`][generate-manual] produces man pages.
+- [`GenerateDoccReference`][generate-docc-reference] produces DocC.
+
+Neither produces plain Markdown — the format that actually renders on GitHub,
+in static site generators, and in any editor your contributors already use.
+This plugin fills that gap, with three built-in themes and a Stencil-based
+template system for when you need something custom.
+
+[generate-manual]: https://github.com/apple/swift-argument-parser/tree/main/Plugins/GenerateManual
+[generate-docc-reference]: https://github.com/apple/swift-argument-parser/tree/main/Plugins/GenerateDoccReference
+
+## Features
+
+- **Zero-config defaults.** Point it at an executable target and get a clean,
+  readable doc set immediately.
+- **Three built-in themes** (`default`, `minimal`, `github`) — drop-in styles
+  for different rendering targets.
+- **Custom themes via [Stencil][stencil]** — override one partial or
+  rebuild from scratch, with a stable, pre-computed view-model.
+- **Single-file or multi-file output.** One big `CLI.md`, or one file per
+  command with an `INDEX.md`.
+- **Full subcommand trees.** Nested commands get their own pages, anchors,
+  and back-links automatically.
+- **YAML config + CLI flag overrides.** Commit your defaults; tweak per-run
+  without editing files.
+- **Per-command overrides.** Patch abstracts, append examples, or hide
+  internal commands without touching your CLI source.
+- **macOS and Linux**, Swift 5.9 and 6.0, fully tested in CI.
+
+[stencil]: https://github.com/stencilproject/Stencil
 
 ## Quick start
 
@@ -93,8 +134,8 @@ swift package generate-docs \
 
 ## Built-in themes
 
-| Theme | Look |
-| --- | --- |
+| Theme     | Look |
+| ---       | --- |
 | `default` | Tables for arguments, simple headings, no emoji. Works anywhere Markdown does. |
 | `minimal` | Bullet lists instead of tables, no TOC by default. Compact for small CLIs. |
 | `github`  | `<details>` blocks, badges, suited for GitHub README rendering. |
@@ -150,6 +191,34 @@ ArgumentView
 The only filter the engine registers is `mdEscape`, for defensive escaping of
 arbitrary `theme.variables` values. Everything else is precomputed.
 
+## Adding `swift-cli-docs-plugin` as a Dependency
+
+To use the plugin in a SwiftPM project, add it to the dependencies for your
+package:
+
+```swift
+let package = Package(
+    // name, platforms, products, etc.
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
+        .package(url: "https://github.com/ilia3546/swift-cli-docs-plugin", from: "0.1.0"),
+    ],
+    targets: [
+        .executableTarget(name: "<command-line-tool>", dependencies: [
+            .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        ]),
+    ]
+)
+```
+
+The plugin is invoked via `swift package`, so no target-level dependency is
+required — adding it at the package level is enough.
+
+## Requirements
+
+- Swift 5.9+
+- macOS 12+ or Linux
+
 ## Status
 
 Pre-1.0. The `RenderContext` shape is the public contract for custom themes;
@@ -157,4 +226,4 @@ breaking changes will be reflected in the version number.
 
 ## License
 
-Apache 2.0.
+This library is released under the Apache 2.0 license. See [LICENSE](LICENSE) for details.
