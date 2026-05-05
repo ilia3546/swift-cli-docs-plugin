@@ -54,7 +54,6 @@ let package = Package(
         .target(
             name: "CLIDocsCore",
             dependencies: [
-                .product(name: "ArgumentParserToolInfo", package: "swift-argument-parser"),
                 .product(name: "Yams", package: "Yams"),
                 .product(name: "Stencil", package: "Stencil"),
                 .product(name: "PathKit", package: "PathKit"),

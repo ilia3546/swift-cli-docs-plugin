@@ -1,5 +1,4 @@
 import Foundation
-import ArgumentParserToolInfo
 
 public enum DefaultsFormatter {
     public static let placeholder = "—"

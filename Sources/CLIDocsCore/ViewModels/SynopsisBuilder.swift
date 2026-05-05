@@ -1,5 +1,4 @@
 import Foundation
-import ArgumentParserToolInfo
 
 /// Builds the `Usage:` synopsis line for a command.
 public enum SynopsisBuilder {

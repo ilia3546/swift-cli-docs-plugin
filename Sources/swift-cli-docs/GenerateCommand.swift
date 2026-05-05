@@ -1,6 +1,5 @@
 import Foundation
 import ArgumentParser
-import ArgumentParserToolInfo
 import CLIDocsCore
 
 @main

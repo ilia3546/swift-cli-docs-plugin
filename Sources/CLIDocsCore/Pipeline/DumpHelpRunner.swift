@@ -1,5 +1,4 @@
 import Foundation
-import ArgumentParserToolInfo
 
 public enum DumpHelpRunnerError: Error, CustomStringConvertible {
     case executableNotFound(URL)

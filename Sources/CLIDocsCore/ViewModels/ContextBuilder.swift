@@ -1,5 +1,4 @@
 import Foundation
-import ArgumentParserToolInfo
 
 /// Strategy for turning a command's full path into a markdown link target.
 /// Multi-file: relative file path. Single-file: anchor fragment.

@@ -1,5 +1,4 @@
 import Foundation
-import ArgumentParserToolInfo
 
 public enum DocsGeneratorError: Error, CustomStringConvertible {
     case writeFailed(URL, underlying: Error)
