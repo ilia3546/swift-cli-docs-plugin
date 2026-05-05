@@ -1,0 +1,2 @@
+{% for sub in command.subcommands %}- [`{{ sub.name }}`]({{ sub.link }}){% if sub.abstract %} — {{ sub.abstractEscaped }}{% endif %}
+{% endfor %}

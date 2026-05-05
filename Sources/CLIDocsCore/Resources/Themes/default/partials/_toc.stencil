@@ -1,0 +1,2 @@
+{% for node in index.nodes %}{{ node.indent }}- [`{{ node.fullPath }}`]({{ node.link }}){% if node.abstract %} — {{ node.abstractEscaped }}{% endif %}
+{% endfor %}

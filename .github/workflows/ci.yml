@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  macos:
+    name: macOS / Swift ${{ matrix.swift }}
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ["5.9", "6.0"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: SwiftyLab/setup-swift@latest
+        with:
+          swift-version: ${{ matrix.swift }}
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test --enable-code-coverage
+
+  linux:
+    name: Linux / Swift ${{ matrix.swift }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: ["5.9", "6.0"]
+    container:
+      image: swift:${{ matrix.swift }}-jammy
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test

@@ -1,0 +1,24 @@
+# {{ meta.title }}
+{% if meta.description %}
+_{{ meta.description }}_
+{% endif %}
+{% if meta.version %}
+
+**Version:** `{{ meta.version }}`
+{% endif %}
+{% if meta.repository %}
+
+**Repository:** <{{ meta.repository }}>
+{% endif %}
+{% if theme.toc %}
+
+## Table of Contents
+
+{% include "partials/_toc.stencil" %}
+{% endif %}
+{% for command in commands %}
+
+---
+
+{% include "command.stencil" %}
+{% endfor %}

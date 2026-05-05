@@ -1,0 +1,2 @@
+{% for arg in section.arguments %}- `{{ arg.displayName }}`{% if arg.isRequired %} **(required)**{% endif %}{% if arg.isRepeating %} _(repeating)_{% endif %}{% if arg.hasDefault %} (default `{{ arg.defaultDisplay }}`){% endif %} — {{ arg.descriptionEscaped }}{% if arg.hasValueRange %} _{{ arg.valueRangeText }}_{% endif %}
+{% endfor %}

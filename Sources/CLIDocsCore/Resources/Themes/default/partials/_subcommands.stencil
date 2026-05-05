@@ -1,0 +1,4 @@
+| Command | Description |
+| --- | --- |
+{% for sub in command.subcommands %}| [`{{ sub.name }}`]({{ sub.link }}) | {{ sub.abstractEscaped }} |
+{% endfor %}

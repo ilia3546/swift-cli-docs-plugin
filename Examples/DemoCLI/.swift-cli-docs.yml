@@ -1,0 +1,16 @@
+target: demo
+output:
+  directory: docs
+  layout: multi-file
+metadata:
+  title: Demo CLI
+  description: Showcase tool for swift-cli-docs-plugin.
+  repository: https://github.com/ilia3546/swift-cli-docs-plugin
+theme:
+  name: default
+  toc: true
+overrides:
+  "demo build":
+    examples:
+      - title: Build a project in release mode
+        code: demo build --release /path/to/project

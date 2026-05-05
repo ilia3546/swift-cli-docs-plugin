@@ -1,0 +1,4 @@
+| Name | Default | Description |
+| --- | --- | --- |
+{% for arg in section.arguments %}| `{{ arg.displayName }}`{% if arg.isRequired %} ![required](https://img.shields.io/badge/required-red){% endif %}{% if arg.isRepeating %} ![repeating](https://img.shields.io/badge/repeating-blue){% endif %} | `{{ arg.defaultDisplay }}` | {{ arg.descriptionEscaped }}{% if arg.hasValueRange %} _{{ arg.valueRangeText }}_{% endif %} |
+{% endfor %}

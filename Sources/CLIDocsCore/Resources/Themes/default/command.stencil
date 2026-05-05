@@ -1,0 +1,47 @@
+{{ command.headingPrefix }} {{ command.fullPath }}
+{% if command.abstract %}
+_{{ command.abstractEscaped }}_
+{% endif %}
+{% if command.synopsis %}
+**Usage**
+
+```{{ theme.codeFence }}
+{{ command.synopsis }}
+```
+{% endif %}
+{% if command.discussion %}
+
+{{ command.discussion }}
+{% endif %}
+{% if command.hasAliases %}
+
+**Aliases:** {% for alias in command.aliases %}`{{ alias }}`{% if not forloop.last %}, {% endif %}{% endfor %}
+{% endif %}
+{% if command.hasArguments %}
+{% for section in command.argumentSections %}
+
+{{ command.headingPrefix }}# {{ section.title }}
+
+{% include "partials/_arguments_section.stencil" %}
+{% endfor %}
+{% endif %}
+{% if command.hasSubcommands %}
+
+{{ command.headingPrefix }}# Subcommands
+
+{% include "partials/_subcommands.stencil" %}
+{% endif %}
+{% if command.hasExamples %}
+
+{{ command.headingPrefix }}# Examples
+
+{% for example in command.examples %}
+**{{ example.titleEscaped }}**
+
+{{ example.codeFenced }}
+{% endfor %}
+{% endif %}
+{% if command.customSections.footer %}
+
+{{ command.customSections.footer }}
+{% endif %}
