@@ -1,0 +1,20 @@
+# {{ meta.title }}
+{% if meta.description %}
+_{{ meta.description }}_
+{% endif %}
+{% if meta.version %}
+
+**Version:** `{{ meta.version }}`
+{% endif %}
+{% if meta.repository %}
+
+**Repository:** <{{ meta.repository }}>
+{% endif %}
+
+## Commands
+
+{% include "partials/_toc.stencil" %}
+{% if command.customSections.footer %}
+
+{{ command.customSections.footer }}
+{% endif %}

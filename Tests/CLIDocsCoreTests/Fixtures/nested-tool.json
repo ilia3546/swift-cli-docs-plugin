@@ -1,0 +1,33 @@
+{
+  "serializationVersion": 0,
+  "command": {
+    "commandName": "demo",
+    "abstract": "Nested demo tool.",
+    "shouldDisplay": true,
+    "subcommands": [
+      {
+        "commandName": "build",
+        "abstract": "Build the project.",
+        "shouldDisplay": true,
+        "arguments": [
+          {
+            "kind": "flag",
+            "shouldDisplay": true,
+            "isOptional": true,
+            "isRepeating": false,
+            "parsingStrategy": "default",
+            "names": [{"kind": "long", "name": "release"}],
+            "preferredName": {"kind": "long", "name": "release"},
+            "abstract": "Use release config."
+          }
+        ]
+      },
+      {
+        "commandName": "internal-debug",
+        "abstract": "Internal debug command.",
+        "shouldDisplay": false,
+        "arguments": []
+      }
+    ]
+  }
+}

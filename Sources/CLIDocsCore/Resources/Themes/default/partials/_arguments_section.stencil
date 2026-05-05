@@ -1,0 +1,4 @@
+| Name | Default | Description |
+| --- | --- | --- |
+{% for arg in section.arguments %}| `{{ arg.displayName }}`{% if arg.isRequired %} **(required)**{% endif %}{% if arg.isRepeating %} _(repeating)_{% endif %} | `{{ arg.defaultDisplay }}` | {{ arg.descriptionEscaped }}{% if arg.hasValueRange %} _{{ arg.valueRangeText }}_{% endif %} |
+{% endfor %}

@@ -1,0 +1,46 @@
+{
+  "serializationVersion": 0,
+  "command": {
+    "commandName": "demo",
+    "abstract": "A demo CLI tool.",
+    "discussion": "Use this tool to demo argument parsing.",
+    "shouldDisplay": true,
+    "arguments": [
+      {
+        "kind": "option",
+        "shouldDisplay": true,
+        "isOptional": true,
+        "isRepeating": false,
+        "parsingStrategy": "default",
+        "names": [
+          {"kind": "short", "name": "v"},
+          {"kind": "long", "name": "verbose"}
+        ],
+        "preferredName": {"kind": "long", "name": "verbose"},
+        "valueName": "level",
+        "defaultValue": "1",
+        "allValueStrings": ["0", "1", "2"],
+        "abstract": "Verbosity level."
+      },
+      {
+        "kind": "flag",
+        "shouldDisplay": true,
+        "isOptional": true,
+        "isRepeating": false,
+        "parsingStrategy": "default",
+        "names": [{"kind": "long", "name": "release"}],
+        "preferredName": {"kind": "long", "name": "release"},
+        "abstract": "Build in release configuration."
+      },
+      {
+        "kind": "positional",
+        "shouldDisplay": true,
+        "isOptional": false,
+        "isRepeating": true,
+        "parsingStrategy": "default",
+        "valueName": "path",
+        "abstract": "One or more paths to process."
+      }
+    ]
+  }
+}

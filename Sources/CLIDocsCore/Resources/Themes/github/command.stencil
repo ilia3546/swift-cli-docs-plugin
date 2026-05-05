@@ -1,0 +1,50 @@
+{{ command.headingPrefix }} {{ command.fullPath }}
+{% if command.abstract %}
+> {{ command.abstractEscaped }}
+{% endif %}
+{% if command.synopsis %}
+
+```{{ theme.codeFence }}
+{{ command.synopsis }}
+```
+{% endif %}
+{% if command.discussion %}
+
+{{ command.discussion }}
+{% endif %}
+{% if command.hasAliases %}
+
+**Aliases:** {% for alias in command.aliases %}`{{ alias }}`{% if not forloop.last %}, {% endif %}{% endfor %}
+{% endif %}
+{% if command.hasArguments %}
+{% for section in command.argumentSections %}
+
+<details><summary><strong>{{ section.title }}</strong></summary>
+
+{% include "partials/_arguments_section.stencil" %}
+
+</details>
+{% endfor %}
+{% endif %}
+{% if command.hasSubcommands %}
+
+<details open><summary><strong>Subcommands</strong></summary>
+
+{% include "partials/_subcommands.stencil" %}
+
+</details>
+{% endif %}
+{% if command.hasExamples %}
+
+{{ command.headingPrefix }}# Examples
+
+{% for example in command.examples %}
+**{{ example.titleEscaped }}**
+
+{{ example.codeFenced }}
+{% endfor %}
+{% endif %}
+{% if command.customSections.footer %}
+
+{{ command.customSections.footer }}
+{% endif %}
