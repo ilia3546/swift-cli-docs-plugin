@@ -47,7 +47,7 @@ final class DocsGeneratorTests: XCTestCase {
         let demoFile = files.first { $0.relativePath == "demo.md" }
         XCTAssertNotNil(demoFile)
         // Minimal theme uses list bullets, not table pipes inside arguments section.
-        XCTAssertTrue(demoFile!.contents.contains("- `--verbose <level>`"))
+        XCTAssertTrue(demoFile!.contents.contains("- `-v, --verbose <level>`"))
         XCTAssertFalse(demoFile!.contents.contains("| Name | Default | Description |"))
     }
 
