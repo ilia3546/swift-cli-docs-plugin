@@ -13,6 +13,6 @@ public struct SingleFileLayout {
         let context = RenderContext(meta: meta, theme: theme, commands: commands, index: index).asDictionary()
         let body = try engine.render(template: "single.stencil", context: context)
         let filename = "\(rootName).md"
-        return [GeneratedFile(relativePath: filename, contents: body)]
+        return [GeneratedFile(relativePath: filename, contents: MarkdownEscape.tidy(body))]
     }
 }

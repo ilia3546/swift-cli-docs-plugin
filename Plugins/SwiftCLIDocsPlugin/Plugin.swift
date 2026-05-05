@@ -1,29 +1,37 @@
 import Foundation
 import PackagePlugin
 
+struct ExecutableEntry {
+    var productName: String
+    var targetName: String
+}
+
 @main
 struct SwiftCLIDocsPlugin: CommandPlugin {
     func performCommand(context: PluginContext, arguments: [String]) async throws {
+        let executables: [ExecutableEntry] = context.package.products.compactMap { product in
+            guard let exe = product as? ExecutableProduct else { return nil }
+            return ExecutableEntry(productName: exe.name, targetName: exe.mainTarget.name)
+        }
+
         try run(
             packageDirectory: context.package.directory.string,
-            executableTargets: context.package.targets.compactMap { $0 as? SwiftSourceModuleTarget }
-                .filter { $0.kind == .executable }
-                .map { $0.name },
+            executables: executables,
             tool: try context.tool(named: "swift-cli-docs"),
             arguments: arguments,
-            buildExecutable: { name in
+            buildExecutable: { entry in
                 let result = try self.packageManager.build(
-                    .product(name),
+                    .product(entry.productName),
                     parameters: .init(configuration: .release, logging: .concise)
                 )
                 guard result.succeeded else {
-                    Diagnostics.error("Failed to build executable '\(name)':\n\(result.logText)")
-                    throw PluginError.buildFailed(name)
+                    Diagnostics.error("Failed to build executable '\(entry.productName)':\n\(result.logText)")
+                    throw PluginError.buildFailed(entry.productName)
                 }
-                guard let artifact = result.builtArtifacts.first(where: { $0.kind == .executable && $0.path.lastComponent == name })
+                guard let artifact = result.builtArtifacts.first(where: { $0.kind == .executable && $0.path.lastComponent == entry.productName })
                     ?? result.builtArtifacts.first(where: { $0.kind == .executable })
                 else {
-                    throw PluginError.builtArtifactNotFound(name)
+                    throw PluginError.builtArtifactNotFound(entry.productName)
                 }
                 return artifact.path.string
             }
@@ -33,10 +41,10 @@ struct SwiftCLIDocsPlugin: CommandPlugin {
     /// Pure logic that's also reusable from XcodeCommandPlugin.
     func run(
         packageDirectory: String,
-        executableTargets: [String],
+        executables: [ExecutableEntry],
         tool: PluginContext.Tool,
         arguments: [String],
-        buildExecutable: (String) throws -> String
+        buildExecutable: (ExecutableEntry) throws -> String
     ) throws {
         var extractor = ArgumentExtractor(arguments)
         let target = extractor.extractOption(named: "target").last
@@ -46,25 +54,32 @@ struct SwiftCLIDocsPlugin: CommandPlugin {
         let theme = extractor.extractOption(named: "theme").last
         let themePath = extractor.extractOption(named: "theme-path").last
 
-        let resolvedTarget: String
+        let availableNames = executables.map(\.targetName)
+
+        let resolved: ExecutableEntry
         if let target {
-            guard executableTargets.contains(target) else {
-                throw PluginError.unknownTarget(target, available: executableTargets)
+            // Match against target name first, then fall back to product name so users
+            // can pass either. This matters when the executable product is renamed in
+            // Package.swift (e.g. target "DemoCLI" exposed as product "demo").
+            guard let entry = executables.first(where: { $0.targetName == target })
+                ?? executables.first(where: { $0.productName == target })
+            else {
+                throw PluginError.unknownTarget(target, available: availableNames)
             }
-            resolvedTarget = target
-        } else if executableTargets.count == 1, let only = executableTargets.first {
-            resolvedTarget = only
-        } else if executableTargets.isEmpty {
+            resolved = entry
+        } else if executables.count == 1, let only = executables.first {
+            resolved = only
+        } else if executables.isEmpty {
             throw PluginError.noExecutableTargets
         } else {
-            throw PluginError.targetRequired(available: executableTargets)
+            throw PluginError.targetRequired(available: availableNames)
         }
 
-        let executablePath = try buildExecutable(resolvedTarget)
+        let executablePath = try buildExecutable(resolved)
 
         var helperArgs: [String] = [
             "--package-root", packageDirectory,
-            "--target", resolvedTarget,
+            "--target", resolved.targetName,
             "--executable", executablePath,
         ]
         if let configPath { helperArgs += ["--config", configPath] }
@@ -115,20 +130,20 @@ import XcodeProjectPlugin
 
 extension SwiftCLIDocsPlugin: XcodeCommandPlugin {
     func performCommand(context: XcodePluginContext, arguments: [String]) throws {
-        let executableTargets = context.xcodeProject.targets.compactMap { target -> String? in
-            // In Xcode contexts there's no direct target.kind == .executable check.
-            // We rely on the user to pass --target explicitly.
-            return target.displayName
+        let executables = context.xcodeProject.targets.map { target in
+            // In Xcode contexts there's no direct target.kind == .executable check
+            // and no separate product/target distinction, so reuse the display name.
+            ExecutableEntry(productName: target.displayName, targetName: target.displayName)
         }
 
         try run(
             packageDirectory: context.xcodeProject.directory.string,
-            executableTargets: executableTargets,
+            executables: executables,
             tool: try context.tool(named: "swift-cli-docs"),
             arguments: arguments,
-            buildExecutable: { name in
+            buildExecutable: { entry in
                 Diagnostics.error("Building executable artifacts from Xcode contexts is not supported. Pass --executable <path> after building the target manually.")
-                throw PluginError.buildFailed(name)
+                throw PluginError.buildFailed(entry.productName)
             }
         )
     }
